@@ -1,0 +1,17 @@
+---
+- name: Basic Setup
+  hosts: webserver
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: install mysql
+      dnf: name=httpd state=present
+
+    - name: install php and libs
+      dnf: name={{ item }} state=installed
+      with_items:
+        - mariadb-server
+    - name: install owncloud
+      unarchive: src=https://download.owncloud.org/community/owncloud-9.0.1.tar.bz2 dest=/usr/local/bin remote_src=yes
+...
