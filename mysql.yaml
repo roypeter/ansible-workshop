@@ -24,7 +24,7 @@
       selinux: policy=targeted state=permissive
 
     - name: copy mysql creds
-      copy: src=/opt/workshop/ansible-workshop/my.cnf dest=/root/.my.cnf mode=0400
+      copy: src=my.cnf dest=/root/.my.cnf mode=0400
 
     - name: create a database
       mysql_db: name=mydb state=present
