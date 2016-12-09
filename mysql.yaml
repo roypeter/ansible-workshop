@@ -5,13 +5,28 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: install mysql
-      dnf: name=httpd state=present
+  - name: install mariadb-server
+    dnf: name=mariadb-server state=installed
 
-    - name: install php and libs
-      dnf: name={{ item }} state=installed
-      with_items:
-        - mariadb-server
-    - name: install owncloud
-      unarchive: src=https://download.owncloud.org/community/owncloud-9.0.1.tar.bz2 dest=/usr/local/bin remote_src=yes
+  - name: start mysql service
+    service: name=mariadb state=started
+
+  - name: install python-mysql
+    dnf: name=python2-mysql state=installed
+
+  - name: update mysql root password
+    mysql_user: name=root host={{ item }} password=secretpw
+    with_items:
+      - 127.0.0.1
+      - ::1
+      - localhost
+
+  - name: copy password file
+    copy: src=my.cnf dest=/root/.my.cnf mode=0400
+
+  - name: create database
+    mysql_db: name=mydb state=present
+
+  - name: new user
+    mysql_user: name=mydbuser password=12345 priv=mydb.*:ALL state=present
 ...
