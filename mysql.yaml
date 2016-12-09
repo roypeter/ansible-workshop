@@ -1,32 +1,33 @@
 ---
-- name: Basic Setup
-  hosts: webserver
-  become: true
-  become_user: root
-  become_method: sudo
+- hosts: webserver
   tasks:
-  - name: install mariadb-server
-    dnf: name=mariadb-server state=installed
+    - name: install mariadb
+      dnf: name=mariadb-server state=installed
 
-  - name: start mysql service
-    service: name=mariadb state=started
+    - name: start mysql service
+      service: name=mariadb state=started
 
-  - name: install python-mysql
-    dnf: name=python2-mysql state=installed
+    - name: install mysql library
+      dnf: name=python2-mysql state=installed
 
-  - name: update mysql root password
-    mysql_user: name=root host={{ item }} password=secretpw
-    with_items:
-      - 127.0.0.1
-      - ::1
-      - localhost
+    - name: update mysql root password
+      mysql_user: name=root host={{ item }} password=secretpw
+      with_items:
+        - 127.0.0.1
+        - ::1
+        - localhost
 
-  - name: copy password file
-    copy: src=my.cnf dest=/root/.my.cnf mode=0400
+    - name: install selinux lib
+      dnf: name=libselinux-python state=installed
 
-  - name: create database
-    mysql_db: name=mydb state=present
+    - name: set selinux permissive
+      selinux: policy=targeted state=permissive
 
-  - name: new user
-    mysql_user: name=mydbuser password=12345 priv=mydb.*:ALL state=present
-...
+    - name: copy mysql creds
+      copy: src=/opt/workshop/ansible-workshop/my.cnf dest=/root/.my.cnf mode=0400
+
+    - name: create a database
+      mysql_db: name=mydb state=present
+
+    - name: create mysql user for mydb
+      mysql_user: name=mydbuser password=12345 priv=mydb.*:All state=present
